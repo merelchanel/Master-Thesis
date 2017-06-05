@@ -69,6 +69,33 @@ Then, the instances with missing values are deleted from the data (again, see Su
 ```
 fdata <- na.omit(fdata)
 ```
+While inspecting the summaries of the data, it showed that some values had spelling mistakes or different writing,
+eventhough they clearly mean the same thing. For these value the writing is made consistent. 
+```
+fdata$category <- gsub("city tour", "City tour", fdata$category)
+fdata$location <- gsub("Kula Lumpur", "Kuala Lumpur", fdata$location)
+fdata$location <- gsub("Lisboa", "Lisbon", fdata$location)
+fdata$location <- gsub("Roma", "Rome", fdata$location)
+fdata$`Percepted Personality(foto/video/text)` <- 
+  gsub("artistic/exentric", "Artistic/exentric", 
+       fdata$`Percepted Personality(foto/video/text)`)
+fdata$Expertise <- gsub("photo/art", "Photo/art", fdata$Expertise)
+fdata$Expertise <- gsub("history/architecture", "History/architecture", 
+                        fdata$Expertise)
+fdata$Expertise <- gsub("local lifestyle", "Local lifestyle", fdata$Expertise)
+```
+For one feature the column name seemed unnecessary long 'Percepted Personality(foto/video/text)'.
+therefore this name is shortened to just 'Personality'
+```
+names(fdata)[37] <- 'Personality'
+```
+Afther cleaning we investiage the dimensions of the data again. 
+```
+dim(fdata)
+``` 
+The dimensions now are:
+- **Instances**: 38452
+- **Features**: 54
 
 
 
