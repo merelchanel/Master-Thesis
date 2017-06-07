@@ -108,4 +108,4 @@ dim(fdata)
 ``` 
 The dimensions now are:
 - **Instances**: 38452
-- **Features**: 54
+- **Features**: 53
