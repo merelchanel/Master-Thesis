@@ -11,6 +11,7 @@ library(ggplot2)
 library(reshape2)
 library('caret')
 library(tidyr)
+library("lubridate")
 
 char <- 
   read_csv("C:/Users/Merel Tombrock/Desktop/WithLocals/Analysis/withlocals_originals_analysis/input/willems_golden host data_2016_12_29 - result - v_menno.csv")
@@ -46,20 +47,34 @@ sapply(data, function(x) length(unique(x)))
 ```
 The number of missing and unique values can also be found in Appendix A of the thesis. 
 
+In order to categeorize the activites per date, an extra variable is created,
+indicating the activities per month, to see whether there are for example effects of season. 
+Furthermore the variables are changed to numeric. 
+```
+# Create variable activity in month
+data$Month <- month(data$activity_date)
+
+# Changing strings with just numbers to numeric
+data$languages <- as.numeric(data$languages)
+data$Month <- as.numeric(data$Month)
+```
+
 Within the dataset some variables seem uniformative, because they only had one value for all instances,
-or because they had too many missing values (see Subsection 3.2.2 of thesis). 
+because they had too many missing values (see Subsection 3.2.2 of thesis), or because they had 
+unique values for every instance (like booking id's).
 ```
 datamin <- data %>% select(-booking_id, -wine_tasting, -is_partner_booking, 
                            -email, -guest_country, -guest_gender, -fullname,
                            -has_published_experiences, -isOriginalsHost, 
-                           -lang_sp, -lang_en, -age, -activity_id)
+                           -lang_sp, -lang_en, -age, -activity_id, -created,
+                           -activity_date)
 ```
 
 In order to do further analysis I converted the categorical variables to factors. 
 ```
 fdata <- as.data.frame(datamin)
 
-for (x in c('location', 'category', 'languages', 'host_continent', 
+for (x in c('location', 'category', 'host_continent', 
             'host_country', 'host_area', 'Character', 'Expertise',
             'Percepted Personality(foto/video/text)')) {
   fdata[,x] = factor(fdata[,x])
@@ -96,8 +111,3 @@ dim(fdata)
 The dimensions now are:
 - **Instances**: 38452
 - **Features**: 54
-
-
-
-
-
