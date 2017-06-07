@@ -58,7 +58,6 @@ data$Month <- month(data$activity_date)
 data$languages <- as.numeric(data$languages)
 data$Month <- as.numeric(data$Month)
 ```
-
 Within the dataset some variables seem uniformative, because they only had one value for all instances,
 because they had too many missing values (see Subsection 3.2.2 of thesis), or because they had 
 unique values for every instance (like booking id's).
@@ -68,12 +67,11 @@ datamin <- data %>% select(-booking_id, -wine_tasting, -is_partner_booking,
                            -has_published_experiences, -isOriginalsHost, 
                            -lang_sp, -lang_en, -age, -activity_id, -created,
                            -activity_date)
-```
 
+fdata <- as.data.frame(datamin)
+```
 In order to do further analysis I converted the categorical variables to factors. 
 ```
-fdata <- as.data.frame(datamin)
-
 for (x in c('location', 'category', 'host_continent', 
             'host_country', 'host_area', 'Character', 'Expertise',
             'Percepted Personality(foto/video/text)')) {
