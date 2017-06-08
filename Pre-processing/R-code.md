@@ -102,8 +102,6 @@ fdata$Expertise <- gsub("history/architecture", "History/architecture",
                         fdata$Expertise)
 fdata$Expertise <- gsub("local lifestyle", "Local lifestyle", fdata$Expertise)
 ```
-
-```
 Afther cleaning we investiage the dimensions of the data again. 
 ```
 dim(fdata)
