@@ -58,6 +58,12 @@ data$Month <- month(data$activity_date)
 data$languages <- as.numeric(data$languages)
 data$Month <- as.numeric(data$Month)
 ```
+For one feature the column name seemed unnecessary long 'Percepted Personality(foto/video/text)'.
+therefore this name is shortened to just 'Personality'
+```
+names(fdata)[37] <- 'Personality'
+```
+
 Within the dataset some variables seem uniformative, because they only had one value for all instances,
 because they had too many missing values (see Subsection 3.2.2 of thesis), or because they had 
 unique values for every instance (like booking id's).
@@ -74,7 +80,7 @@ In order to do further analysis I converted the categorical variables to factors
 ```
 for (x in c('location', 'category', 'host_continent', 
             'host_country', 'host_area', 'Character', 'Expertise',
-            'Percepted Personality(foto/video/text)')) {
+            'Personality')) {
   fdata[,x] = factor(fdata[,x])
 }  
 ```
@@ -89,18 +95,14 @@ fdata$category <- gsub("city tour", "City tour", fdata$category)
 fdata$location <- gsub("Kula Lumpur", "Kuala Lumpur", fdata$location)
 fdata$location <- gsub("Lisboa", "Lisbon", fdata$location)
 fdata$location <- gsub("Roma", "Rome", fdata$location)
-fdata$`Percepted Personality(foto/video/text)` <- 
-  gsub("artistic/exentric", "Artistic/exentric", 
-       fdata$`Percepted Personality(foto/video/text)`)
+fdata$Personality <- gsub("artistic/exentric", "Artistic/exentric", 
+       fdata$Personality)
 fdata$Expertise <- gsub("photo/art", "Photo/art", fdata$Expertise)
 fdata$Expertise <- gsub("history/architecture", "History/architecture", 
                         fdata$Expertise)
 fdata$Expertise <- gsub("local lifestyle", "Local lifestyle", fdata$Expertise)
 ```
-For one feature the column name seemed unnecessary long 'Percepted Personality(foto/video/text)'.
-therefore this name is shortened to just 'Personality'
-```
-names(fdata)[37] <- 'Personality'
+
 ```
 Afther cleaning we investiage the dimensions of the data again. 
 ```
