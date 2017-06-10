@@ -61,9 +61,36 @@ data$Month <- as.numeric(data$Month)
 For one feature the column name seemed unnecessary long 'Percepted Personality(foto/video/text)'.
 therefore this name is shortened to just 'Personality'
 ```
-names(fdata)[37] <- 'Personality'
+names(data)[37] <- 'Personality'
 ```
-
+While inspecting the summaries of the data, it showed that some values had spelling mistakes or different writing,
+eventhough they clearly mean the same thing. For these value the writing is made consistent. 
+```
+data$category <- gsub("city tour", "City tour", fdata$category)
+data$location <- gsub("Kula Lumpur", "Kuala Lumpur", fdata$location)
+data$location <- gsub("Lisboa", "Lisbon", fdata$location)
+data$location <- gsub("Roma", "Rome", fdata$location)
+data$Personality <- gsub("artistic/exentric", "Artistic/exentric", 
+       fdata$Personality)
+data$Expertise <- gsub("photo/art", "Photo/art", fdata$Expertise)
+data$Expertise <- gsub("history/architecture", "History/architecture", 
+                        fdata$Expertise)
+data$Expertise <- gsub("local lifestyle", "Local lifestyle", fdata$Expertise)
+```
+In order to do further analysis I converted the categorical variables to factors. 
+```
+for (x in c('location', 'category', 'host_continent', 
+            'host_country', 'host_area', 'Character', 'Expertise',
+            'Personality')) {
+  data[,x] = factor(data[,x])
+}  
+```
+Furthermore, categorical variable 'host_area' dummy variables are created. 
+```
+# Create dummy variables for cities ------------------------------------------
+dummies <- model.matrix(~ + host_area,data)
+data <- cbind(data, dummies)
+```
 Within the dataset some variables seem uniformative, because they only had one value for all instances,
 because they had too many missing values (see Subsection 3.2.2 of thesis), or because they had 
 unique values for every instance (like booking id's).
@@ -72,37 +99,16 @@ datamin <- data %>% select(-booking_id, -wine_tasting, -is_partner_booking,
                            -email, -guest_country, -guest_gender, -fullname,
                            -has_published_experiences, -isOriginalsHost, 
                            -lang_sp, -lang_en, -age, -activity_id, -created,
-                           -activity_date)
-
+                           -activity_date, -Character, -Personality, - Expertise,
+                           -category, -est_age, -location, -host_continent,
+                           -host_country, -host_area)
 fdata <- as.data.frame(datamin)
-```
-In order to do further analysis I converted the categorical variables to factors. 
-```
-for (x in c('location', 'category', 'host_continent', 
-            'host_country', 'host_area', 'Character', 'Expertise',
-            'Personality')) {
-  fdata[,x] = factor(fdata[,x])
-}  
 ```
 Then, the instances with missing values are deleted from the data (again, see Subsection 3.2.2 of thesis). 
 ```
 fdata <- na.omit(fdata)
 ```
-While inspecting the summaries of the data, it showed that some values had spelling mistakes or different writing,
-eventhough they clearly mean the same thing. For these value the writing is made consistent. 
-```
-fdata$category <- gsub("city tour", "City tour", fdata$category)
-fdata$location <- gsub("Kula Lumpur", "Kuala Lumpur", fdata$location)
-fdata$location <- gsub("Lisboa", "Lisbon", fdata$location)
-fdata$location <- gsub("Roma", "Rome", fdata$location)
-fdata$Personality <- gsub("artistic/exentric", "Artistic/exentric", 
-       fdata$Personality)
-fdata$Expertise <- gsub("photo/art", "Photo/art", fdata$Expertise)
-fdata$Expertise <- gsub("history/architecture", "History/architecture", 
-                        fdata$Expertise)
-fdata$Expertise <- gsub("local lifestyle", "Local lifestyle", fdata$Expertise)
-```
-Afther cleaning we investiage the dimensions of the data again. 
+Afther cleaning we investegate the dimensions of the data again. 
 ```
 dim(fdata)
 ``` 
