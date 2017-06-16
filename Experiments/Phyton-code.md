@@ -72,3 +72,5 @@ pca = PCA()
 X = pca.fit_transform(X)
 ```
 However, it did not improve the results and therefore the results are not used. 
+
+The function 'report' is created to easily obtain all our metrics 
