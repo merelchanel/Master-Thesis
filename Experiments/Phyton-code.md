@@ -59,9 +59,9 @@ print(X_train.shape, y_train.shape)
 print(X_val.shape, y_val.shape)
 ```
 The shapes of the final datasets are: 
-X_train = (23070, 50)
-X_val = (7691, 50)
-X_test = (7691, 50)
+** X_train = (23070, 50) **
+** X_val = (7691, 50) **
+** X_test = (7691, 50) **
 
 Applying PCA is tested to see whether it improves results. 
 ```
@@ -73,7 +73,7 @@ X = pca.fit_transform(X)
 ```
 However, it did not improve the results and therefore the results are not used. 
 
-The function 'report' is created to easily obtain all our metrics 
+The function 'report' is created to easily obtain all our metrics:
 ```
 def report(y_val, y_val_pred):
     print("Accuracy")
@@ -92,7 +92,7 @@ def report(y_val, y_val_pred):
 ```
 Then the different classifiers are tested on the validationset. 
 
-Naive Bayes
+**Naive Bayes**
 ```
 from sklearn.naive_bayes import GaussianNB
 
@@ -101,7 +101,7 @@ nb.fit(X_train, y_train)
 y_val_pred = nb.predict(X_val)
 report(y_val, y_val_pred)
 ```
-KNN
+**KNN**
 ```
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -112,7 +112,7 @@ for k in range(1, 15):
     print("K = ", k)
     report(y_val, y_val_pred)
 ``` 
-Decision Tree
+**Decision Tree**
 ``` 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
@@ -126,7 +126,7 @@ for crit in ['entropy', 'gini']:
     print("Criteria = ", crit)
     report(y_val, y_val_pred)
 ```
-Random Forest
+**Random Forest**
 ```
 from sklearn.ensemble import RandomForestClassifier
 
@@ -139,7 +139,7 @@ for crit in ['entropy', 'gini']:
     print("crit = ", crit)
     report(y_val, y_val_pred)
 ```
-Neural Network
+**Neural Network**
 ```
 from sklearn.neural_network import MLPClassifier
 
@@ -152,7 +152,7 @@ for act in ['identity', 'logistic', 'tanh', 'relu']:
             print("activation = ", act, "solver = ", sol, "alpha =", a)
             report(y_val, y_val_pred)
 ```
-Support Vector Machine
+**Support Vector Machine**
 ```
 from sklearn.svm import SVC
 
@@ -163,7 +163,7 @@ for kern in ['rbf', 'poly', 'linear', 'sigmoid']:
     print("kernel = ", kern)
     report(y_val, y_val_pred)
 ```
-Stochastic Gradient Descent
+**Stochastic Gradient Descent**
 ```
 from sklearn.linear_model import SGDClassifier
 
@@ -174,7 +174,7 @@ for loss in ['hing', 'log', 'modified_huber']:
         print("Loss = ", loss)
         report(y_val, y_val_pred)
  ```
-Logistic Regression
+**Logistic Regression**
 ```
 from sklearn.linear_model import LogisticRegression
 
