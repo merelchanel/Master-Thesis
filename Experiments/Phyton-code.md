@@ -59,9 +59,9 @@ print(X_train.shape, y_train.shape)
 print(X_val.shape, y_val.shape)
 ```
 The shapes of the final datasets are: 
-** X_train = (23070, 50) **
-** X_val = (7691, 50) **
-** X_test = (7691, 50) **
+- X_train = (23070, 50)
+- X_val = (7691, 50)
+- X_test = (7691, 50) 
 
 Applying PCA is tested to see whether it improves results. 
 ```
