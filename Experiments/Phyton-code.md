@@ -244,37 +244,28 @@ plt.show()
 ```
 Finally, a big graph is created showing the ROC curves of all different classifiers: 
 ```
-nb = GaussianNB()
-nb.fit(X_train, y_train)
-y_val_pred = nb.predict(X_val)
-
 knn = KNeighborsClassifier(n_neighbors = 13)
 knn.fit(X_train, y_train)
 y_val_pred = knn.predict(X_val)
 
-dt = DecisionTreeClassifier(criterion = 'entropy')
-dt.fit(X_train, y_train)
-y_val_pred = dt.predict(X_val)
-
-rf = RandomForestClassifier(criterion = 'entropy')
+rf = RandomForestClassifier(bootstrap=False, min_samples_leaf=2, 
+                            min_samples_split=2, criterion='entropy', 
+                            max_features=10, max_depth=None)
 rf.fit(X_train, y_train)
 y_val_pred = rf.predict(X_val)
 
-nn = MLPClassifier(activation = 'tanh', solver = 'adam')
+nn = MLPClassifier(activation='tanh', solver='adam', alpha=1e-05, 
+                   hidden_layer_sizes=(100,100,100))
 nn.fit(X_train, y_train)
 y_val_pred = nn.predict(X_val)
 
-svc = SVC(kernel = 'poly')
-svc.fit(X_train, y_train)
-y_val_pred = svc.predict(X_val)
+lr = LogisticRegression(solver='lbfgs', C=1.0)
+lr.fit(X_train, y_train)
+y_val_pred = lr.predict(X_val)
 
 sgd = SGDClassifier(loss = 'log', random_state=25)
 sgd.fit(X_train, y_train)
 y_val_pred = sgd.predict(X_val)
-
-lr = LogisticRegression(solver = 'newton-cg')
-lr.fit(X_train, y_train)
-y_val_pred = lr.predict(X_val)
 
 # ROC
 models = [
@@ -285,14 +276,6 @@ models = [
         'roc_test': X_val,
         'roc_train_class': y_train,        
         'roc_test_class': y_val,        
-    },   
-    {
-        'label' : 'SVC',
-        'model': svc,
-        'roc_train': X_train,
-        'roc_test': X_val,
-        'roc_train_class': y_train,        
-        'roc_test_class': y_val,     
     },        
     {
         'label' : 'KNeighborsClassifier',
@@ -311,14 +294,6 @@ models = [
         'roc_test_class': y_val,       
     },        
     {
-        'label' : 'NaiveBayes',
-        'model': nb,
-        'roc_train': X_train,
-        'roc_test': X_val,
-        'roc_train_class': y_train,        
-        'roc_test_class': y_val,       
-    }, 
-    {
         'label' : 'Neural Network',
         'model': nn,
         'roc_train': X_train,
@@ -326,14 +301,6 @@ models = [
         'roc_train_class': y_train,        
         'roc_test_class': y_val,       
     },
-    {
-        'label' : 'DecisionTree',
-        'model': dt,
-        'roc_train': X_train,
-        'roc_test': X_val,
-        'roc_train_class': y_train,        
-        'roc_test_class': y_val,       
-    }, 
     {
         'label' : 'StochasticGradientDescent',
         'model': sgd,
