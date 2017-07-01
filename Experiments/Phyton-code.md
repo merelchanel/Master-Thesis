@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 import random
 from sklearn.cross_validation import KFold, cross_val_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.grid_search import GridSearchCV
+from time import time
+from sklearn.model_selection import GridSearchCV
 
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_curve
 from sklearn.metrics import classification_report, cohen_kappa_score, roc_auc_score
@@ -73,6 +76,15 @@ X = pca.fit_transform(X)
 ```
 However, it did not improve the results and therefore the results are not used. 
 
+Code to add feature interactions: 
+```
+# Feature intereactions 
+from sklearn.preprocessing import PolynomialFeatures
+inter = PolynomialFeatures(degree=2, interaction_only=True)
+X_train_zi = inter.fit_transform(X_train)
+X_val_zi = inter.transform(X_val)
+```
+
 The function 'report' is created to easily obtain all our metrics:
 ```
 def report(y_val, y_val_pred):
@@ -90,112 +102,129 @@ def report(y_val, y_val_pred):
     print(roc_auc_score(y_val, y_val_pred))
     print("//// end of report ///")
 ```
-Then the different classifiers are tested on the validationset. 
 
-**Naive Bayes**
+Grid search to search for best parameters, with K-NN as example: 
 ```
-from sklearn.naive_bayes import GaussianNB
+# Set parameters
+cf = KNeighborsClassifier()
+param_grid = {"n_neighbors": [1,2,3,4,5,6,7,8,9,10,11,12,13,14]}
 
-nb = GaussianNB()
-nb.fit(X_train, y_train)
-y_val_pred = nb.predict(X_val)
-report(y_val, y_val_pred)
+# Utility function to report best scores
+def report(results, n_top=3):
+    for i in range(1, n_top + 1):
+        candidates = np.flatnonzero(results['rank_test_score'] == i)
+        for candidate in candidates:
+            print("Model with rank: {0}".format(i))
+            print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+                  results['mean_test_score'][candidate],
+                  results['std_test_score'][candidate]))
+            print("Parameters: {0}".format(results['params'][candidate]))
+            print("")
+
+
+grid_search = GridSearchCV(cf, param_grid, scoring=score)
+start = time()
+grid_search.fit(X_train_zi, y_arr)
+
+print("GridSearchCV took %.2f seconds for %d candidate parameter settings."
+      % (time() - start, len(grid_search.cv_results_['params'])))
+report(grid_search.cv_results_)
 ```
+
+Then the different classifiers are tested on the validationset, 
+with the parameter settings that resulted best on the grid-search:
+
 **KNN**
 ```
 from sklearn.neighbors import KNeighborsClassifier
 
-for k in range(1, 15):
-    knn = KNeighborsClassifier(n_neighbors = k)
-    knn.fit(X_train, y_train)
-    y_val_pred = knn.predict(X_val)
-    print("K = ", k)
-    report(y_val, y_val_pred)
-``` 
-**Decision Tree**
-``` 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn import tree
+cf = KNeighborsClassifier()
+param_grid = {"n_neighbors": [1,2,3,4,5,6,7,8,9,10,11,12,13,14]}
 
-# tested with class_weights = {1:(1 till 10)}
-
-for crit in ['entropy', 'gini']:
-    dt = DecisionTreeClassifier(criterion = crit)
-    dt.fit(X_train, y_train)
-    y_val_pred = dt.predict(X_val)
-    print("Criteria = ", crit)
-    report(y_val, y_val_pred)
-```
+knn = KNeighborsClassifier(n_neighbors = 13)
+knn.fit(X_train, y_train)
+y_val_pred = knn.predict(X_val)
+metrics(y_val, y_val_pred)
+``` 
 **Random Forest**
 ```
 from sklearn.ensemble import RandomForestClassifier
 
 # tested with class_weights = {1:(1 till 10)}
 
-for crit in ['entropy', 'gini']:
-    rf = RandomForestClassifier(criterion = crit)
-    rf.fit(X_train, y_train)
-    y_val_pred = rf.predict(X_val)
-    print("crit = ", crit)
-    report(y_val, y_val_pred)
+# Set parameters
+cf = RandomForestClassifier()
+param_grid = {"max_features": ['auto', 'sqrt', 0.2, 1, 3, 10], 
+              "max_depth": [3, None],
+              "min_samples_split": [2, 3, 10],
+              "min_samples_leaf": [1, 3, 10],
+              "bootstrap": [True, False],
+              "criterion": ["gini", "entropy"]}
+
+rf = RandomForestClassifier(bootstrap=False, min_samples_leaf=3, 
+                            min_samples_split=2, criterion='gini', 
+                            max_features=0.2, max_depth=None)
 ```
 **Neural Network**
 ```
 from sklearn.neural_network import MLPClassifier
 
-for act in ['identity', 'logistic', 'tanh', 'relu']:
-    for sol in ['lbfgs', 'sgd', 'adam']:
-        for a in [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0]:
-            nn = MLPClassifier(activation = act, solver = sol, alpha = a)
-            nn.fit(X_train, y_train)
-            y_val_pred = nn.predict(X_val)
-            print("activation = ", act, "solver = ", sol, "alpha =", a)
-            report(y_val, y_val_pred)
+cf = MLPClassifier()
+param_grid = {"activation": ['identity', 'logistic', 'tanh', 'relu'], 
+              "solver": ['lbfgs', 'sgd', 'adam'],
+              "alpha": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0],
+              "hidden_layer_sizes": [(50,50,50), (50,50), (100,100,100)]}
+              
+nn = MLPClassifier(activation='tanh', solver='adam', 
+                   alpha=1e-05, hidden_layer_sizes=(100,100,100))
+nn.fit(X_train_zi, y_train)
+y_val_pred = nn.predict(X_val_zi)
+metrics(y_val, y_val_pred)
 ```
-**Support Vector Machine**
+**Logistic Regression**
 ```
-from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 
-for kern in ['rbf', 'poly', 'linear', 'sigmoid']:
-    svc = SVC(kernel = kern)
-    svc.fit(X_train, y_train)
-    y_val_pred = svc.predict(X_val)
-    print("kernel = ", kern)
-    report(y_val, y_val_pred)
+cf = LogisticRegression()
+param_grid = {"solver": ['newton-cg','lbfgs', 'liblinear', 'sag'],
+              "C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0]}
+              
+lr = LogisticRegression(solver='lbfgs', C=1.0)
+lr.fit(X_train_zi, y_train)
+y_val_pred = lr.predict(X_val_zi)
+metrics(y_val, y_val_pred)
 ```
 **Stochastic Gradient Descent**
 ```
 from sklearn.linear_model import SGDClassifier
 
-for loss in ['hing', 'log', 'modified_huber']:
-        sgd = SGDClassifier(loss = loss, random_state=25)
-        sgd.fit(X_train, y_train)
-        y_val_pred = sgd.predict(X_val)
-        print("Loss = ", loss)
-        report(y_val, y_val_pred)
+cf = SGDClassifier()
+param_grid = {"loss": ['hinge', 'log', 'modified_huber', 'perceptron'], 
+              "penalty": ['none', 'l2', 'l1'],
+              "alpha": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0]}
+ sgd = SGDClassifier(loss='perceptron', penalty='l2', alpha=0.01, n_iter=5, random_state=25)
+sgd.fit(X_train_zi, y_train)
+y_val_pred = sgd.predict(X_val_zi)
+metrics(y_val, y_val_pred)
  ```
-**Logistic Regression**
-```
-from sklearn.linear_model import LogisticRegression
 
-for sol in ['newton-cg', 'lbfgs', 'liblinear', 'sag']:
-    lr = LogisticRegression(solver = sol)
-    lr.fit(X_train, y_train)
-    y_val_pred = lr.predict(X_val)
-    print("Solver = ", sol)
-    report(y_val, y_val_pred)
-```
-The decision tree with the parameter setting criterion = 'entropy' seemed to perform best on the validation 
+The Random Forest classifier seemed to perform best on the validation 
 set. Therefore this classifier is tested with the testset. 
 ```
 # Testing on testset 
 X_train = np.concatenate((X_train, X_val), axis = 0)
 y_train = np.concatenate((y_train, y_val), axis = 0)
 
-model = DecisionTreeClassifier(criterion = 'entropy')
-model.fit(X_train, y_train)
-pred = model.predict(X_test)
-report(y_test, pred)
+inter = PolynomialFeatures(degree=2, interaction_only=True)
+X_train_i = inter.fit_transform(X_train)
+X_test_i = inter.transform(X_test)
+
+model = RandomForestClassifier(bootstrap=False, min_samples_leaf=3, 
+                            min_samples_split=2, criterion='gini', 
+                            max_features=0.2, max_depth=None)
+model.fit(X_train_i, y_train)
+pred = model.predict(X_test_i)
+metrics(y_test, pred)
 ```
 Furthermore, I made ROC plots for all classifiers with the following code: 
 ```
