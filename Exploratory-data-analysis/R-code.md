@@ -28,3 +28,6 @@ To investigate the expertises between the chacarter of the hosts.
 ```
 ggplot(fdata, aes(Character, fill=Expertise)) + geom_bar(position="dodge")
 ```
+An example of a stacked histogram that was created is found below: 
+![stackedhistogram](/images/hist.png)
+Format: ![Alt Text](url)
